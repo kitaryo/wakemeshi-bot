@@ -2,12 +2,15 @@ application: tanaka-bot
 version: 3
 runtime: python27
 api_version: 1
-threadsafe: yes
+threadsafe: no
 
 handlers:
 - url: /favicon\.ico
   static_files: favicon.ico
   upload: favicon\.ico
+
+- url: /mention
+  script: mention.py
 
 - url: /.*
   script: main.py
