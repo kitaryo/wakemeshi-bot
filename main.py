@@ -21,5 +21,10 @@ class MainHandler(webapp2.RequestHandler):
         self.response.write('Hello world!')
 
 app = webapp2.WSGIApplication([
-    ('/', MainHandler)
+    ('/', MainHandler),
+    ('/mention', MentionHandler),
+    ('/notification', NotificationHandler),
+    ('/menu', MenuHandler)
 ], debug=True)
+
+run_wsgi_app(app)

@@ -1,5 +1,5 @@
-application: wakeimeshi_bot
-version: 1
+application: tanaka-bot
+version: 3
 runtime: python27
 api_version: 1
 threadsafe: yes
@@ -9,8 +9,8 @@ handlers:
   static_files: favicon.ico
   upload: favicon\.ico
 
-- url: .*
-  script: main.app
+- url: /.*
+  script: main.py
 
 libraries:
 - name: webapp2

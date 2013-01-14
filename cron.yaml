@@ -1,0 +1,12 @@
+cron:
+- description: daily breakfast report
+  url: /notification?type=0
+  schedule: every day 06:30
+
+- description: daily lunch report
+  url: /notification?type=1
+  schedule: every day 11:30
+
+- description: daily dinner report
+  url: /notification?type=2
+  schedule: every day 17:00

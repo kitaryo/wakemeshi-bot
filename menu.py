@@ -7,9 +7,22 @@ import urllib2 as urllib
 from pyquery import PyQuery as pq
 from lxml import html
 
+import cgi
+
+from google.appengine.api import users
+from google.appengine.ext import webapp
+from google.appengine.ext.webapp.util import run_wsgi_app
+from google.appengine.ext import db
+
 
 url1 = "http://www.wakei.org/jukusei/index.html"
 url2 = "http://www.wakei.org/jukusei/index2.html"
+
+class Greeting(db.Model):
+  date = db.DateProperty()
+  type = db.IntegerProperty()
+  menu = db.StringProperty(multiline=True)
+
 
 def menu():
   list = parse(url1) + parse(url2)
