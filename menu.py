@@ -3,49 +3,47 @@
 #
 # get menues from wakeijuku.org
 
-import urllib2 as urllib
-from pyquery import PyQuery as pq
-from lxml import html
 
-import cgi
-
-from google.appengine.api import users
-from google.appengine.ext import webapp
-from google.appengine.ext.webapp.util import run_wsgi_app
+import webapp2
 from google.appengine.ext import db
+
+import urllib2 as urllib
+import lxml.html
+import re
 
 
 url1 = "http://www.wakei.org/jukusei/index.html"
 url2 = "http://www.wakei.org/jukusei/index2.html"
 
-class Greeting(db.Model):
+class Menu(db.Model):
   date = db.DateProperty()
   type = db.IntegerProperty()
   menu = db.StringProperty(multiline=True)
 
 
-def menu():
-  list = parse(url1) + parse(url2)
-  print list
+class MenuParser:
+    def get(self):
+        list = self.retrieve(url1) + self.retrieve(url2)
+        return list
+
+    def retrieve(self, url):
+        list = []
+        html = urllib.urlopen(url).read()
+        html = re.sub(r'</?br\s?/?>', '\n', html)
+        doc = lxml.html.fromstring(html)
+
+        for item in doc.xpath("//tbody//tr//td"):
+            list.append(item.text)
+
+        return list
 
 
-def parse(url):
-  list = []
-  d = pq(url=url)
+class MainPage(webapp2.RequestHandler):
+    def get(self):
+        menu = MenuParser()
+        self.response.headers["Content-Type"] = "text/html; charset=utf-8"
+        self.response.out.write(menu.get()[3])
 
-  for tr in d(".green-table > tbody > tr"):
-    tds = pq(tr)("td")
-
-    ar = []
-    ar.append(tds.eq(0).text())
-    ar.append(tds.eq(1).text())
-    ar.append(tds.eq(2).text())
-    ar.append(tds.eq(3).text())
-
-    list.append(ar)
-
-  return list
-
-
-if __name__ == "__main__":
-  menu()
+app = webapp2.WSGIApplication([
+    ("/menu", MainPage)
+    ], debug=True)

@@ -1,20 +1,32 @@
-application: tanaka-bot
-version: 3
+application: wakemeshi-bot
+version: 1
 runtime: python27
 api_version: 1
-threadsafe: no
+threadsafe: yes
 
 handlers:
 - url: /favicon\.ico
   static_files: favicon.ico
   upload: favicon\.ico
 
-- url: /mention
-  script: mention.py
+- url: /notification
+  script: notification.app
+  login: admin
 
-- url: /.*
-  script: main.py
+- url: /menu
+  script: menu.app
+  login: admin
+
+- url: /mention
+  script: mention.app
+  login: admin
+
+- url: .*
+  script: main.app
 
 libraries:
 - name: webapp2
   version: "2.5.2"
+
+- name: lxml
+  version: latest

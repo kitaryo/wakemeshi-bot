@@ -10,3 +10,11 @@ cron:
 - description: daily dinner report
   url: /notification?type=2
   schedule: every day 17:00
+
+- description: periodic processing of mentions
+  url: /mention
+  schedule: every 10 minutes
+
+- description: periodic scraping of menu
+  url: /menu
+  schedule: every 2 days

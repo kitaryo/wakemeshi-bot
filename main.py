@@ -14,23 +14,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-from google.appengine.ext import webapp
-from google.appengine.ext.webapp.util import run_wsgi_app
+import webapp2
 
-class MainHandler(webapp.RequestHandler):
-  def get(self):
-    self.response.headers['Content-Type'] = 'text/plain'
-    self.response.write('Hello world!')
+class MainHandler(webapp2.RequestHandler):
+    def get(self):
+        self.response.write('Hello world!')
 
-app = webapp.WSGIApplication([
-  ('/', MainHandler),
-#  ('/mention', MentionHandler),
-#  ('/notification', NotificationHandler),
-#  ('/menu', MenuHandler)
+app = webapp2.WSGIApplication([
+    ('/', MainHandler)
 ], debug=True)
-
-def main():
-  run_wsgi_app(app)
-
-if __name__ == '__main__':
-  main()
