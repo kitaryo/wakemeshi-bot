@@ -17,4 +17,5 @@ cron:
 
 - description: periodic scraping of menu
   url: /menu
-  schedule: every 2 days
+  schedule: every day 04:17
+
