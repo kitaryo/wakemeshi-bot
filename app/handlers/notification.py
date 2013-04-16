@@ -25,17 +25,7 @@ class NotificationHandler(webapp2.RequestHandler):
         date = datetime.datetime.now().date()
         menu = Menu.get_by_key_name(str(date))
 
-        # output formatting
-        time = [u"朝食", u"昼食", u"夕食"]
-        weekdays = [u"月", u"火", u"水", u"木", u"金", u"土", u"日"]
-
-        post = u"{month}月{day}日({week}) {time}:\n{menu}".format(
-            month=date.month,
-            day=date.day,
-            week=weekdays[date.weekday()],
-            time=time[type],
-            menu=menu.menu[type]
-            )
+        post = menu.format(date, type)
 
         # debug output
         self.response.out.write(post)
