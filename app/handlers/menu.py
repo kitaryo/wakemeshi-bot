@@ -13,12 +13,15 @@ import datetime
 
 from app.models.menu import Menu
 
+# data src
 url1 = "http://www.wakei.org/jukusei/index.html"
 url2 = "http://www.wakei.org/jukusei/index2.html"
 
 class MenuHandler(webapp2.RequestHandler):
     def get(self):
         self.update()
+
+        # debug output
         items = Menu.query("SELECT * FROM Menu ORDER BY date DESC LIMIT 14")
         for i in items:
             self.response.out.write(u'<p>')
@@ -30,8 +33,10 @@ class MenuHandler(webapp2.RequestHandler):
 
 
     def update(self):
+        # data retrieve
         list = self.retrieve(url1) + self.retrieve(url2)
 
+        # data storing
         for i in range(len(list) / 4):
             d = self.parseDate(list[i*4])
             menu = Menu(date=d, key_name=str(d))
@@ -42,9 +47,9 @@ class MenuHandler(webapp2.RequestHandler):
 
     def retrieve(self, url):
         list = []
-        bytestring = urllib.urlopen(url).read() # returned as a byte string
+        bytestring = urllib.urlopen(url).read()
         # return/break replacement
-        bytestring = re.sub(r'</?br\s?/?>', '\n', bytestring) # "re" can handle both unicode string and byte string
+        bytestring = re.sub(r'</?br\s?/?>', '\n', bytestring)
         doc = lxml.etree.fromstring(bytestring,
                 lxml.etree.HTMLParser(encoding="shift_jis",recover=True))
 
