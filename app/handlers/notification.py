@@ -41,6 +41,7 @@ class NotificationHandler(webapp2.RequestHandler):
 
         # tweet
         api = twitter.oauth('config/twitter.yaml')
+        api.update_status(post)
 
 
 
