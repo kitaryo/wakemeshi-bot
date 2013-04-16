@@ -9,20 +9,20 @@ handlers:
   static_files: favicon.ico
   upload: favicon\.ico
 
-- url: /notification
-  script: notification.app
+- url: /notification.*
+  script: app.handlers.notification.app
   login: admin
 
 - url: /menu
-  script: menu.app
+  script: app.handlers.menu.app
   login: admin
 
 - url: /mention
-  script: mention.app
+  script: app.handlers.mention.app
   login: admin
 
 - url: .*
-  script: main.app
+  script: app.main.app
 
 libraries:
 - name: webapp2
