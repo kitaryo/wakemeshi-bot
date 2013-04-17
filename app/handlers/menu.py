@@ -21,16 +21,6 @@ class MenuHandler(webapp2.RequestHandler):
     def get(self):
         self.update()
 
-        # debug output
-        items = Menu.query("SELECT * FROM Menu ORDER BY date DESC LIMIT 14")
-        for i in items:
-            self.response.out.write(u'<p>')
-            self.response.out.write(u'%d月%d日<br>' % (i.date.month, i.date.day))
-            self.response.out.write(u'朝食: %s<br>' % i.menu[0])
-            self.response.out.write(u'昼食: %s<br>' % i.menu[1])
-            self.response.out.write(u'夕食: %s<br>' % i.menu[2])
-            self.response.out.write(u'</p>')
-
 
     def update(self):
         # data retrieve
@@ -60,7 +50,8 @@ class MenuHandler(webapp2.RequestHandler):
 
 
     def parseDate(self, datestring):
-        t = datetime.datetime.now().date()
+        # datetime in JST
+        t = (datetime.datetime.now() + datetime.timedelta(hours=+9)).date()
         y = t.year
 
         r = u'(?P<month>\d+)月(?P<day>\d+)日'

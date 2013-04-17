@@ -21,8 +21,8 @@ class NotificationHandler(webapp2.RequestHandler):
         if (type < 0 and 2 < type):
             type = 0
 
-        # get menu
-        date = datetime.datetime.now().date()
+        # get menu by JST
+        date = (datetime.datetime.now() + datetime.timedelta(hours=+9)).date()
         menu = Menu.get_by_key_name(str(date))
 
         post = menu.format(date, type)

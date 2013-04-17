@@ -5,6 +5,7 @@
 
 import webapp2
 import re
+import datetime
 
 import lib.twitter as twitter
 
@@ -14,25 +15,24 @@ from app.models.menu import Menu
 from app.models.mention import Mention
 
 class MentionHandler(webapp2.RequestHandler):
-    REP_TYPE_MENU = 0
-    REP_TYPE_FB   = 1
-    REP_TYPE_NONE = 2
+    REP_TYPE_MENU = 0x00
+    REP_TYPE_FB   = 0x01
+    REP_TYPE_NONE = 0x02
+    MENU_TIME_BREAKFAST = 0
+    MENU_TIME_LUNCH     = 1
+    MENU_TIME_DINNER    = 2
     api = None
 
     def get(self):
         # instansiate and login to twitter
-        api = twitter.oauth("config/twitter.yaml")
+        self.api = twitter.oauth("config/twitter.yaml")
 
         # determin which mention is to be processed
-        last_mention = Mention.get_by_key_name("last_mention")
-        if (last_mention is None):
-            since_id = None
-            last_mention = Mention(key_name="last_mention")
-        else:
-            since_id = last_mention.id
+        last_mention = Mention.get_or_insert("last_mention")
+        since_id = last_mention.id
 
         # get actual mentions
-        mentions = api.mentions_timeline(since_id=since_id, count=30)
+        mentions = self.api.mentions_timeline(since_id=since_id, count=30)
         if len(mentions) > 0:
             for s in mentions:
                 # process against each mention
@@ -40,42 +40,46 @@ class MentionHandler(webapp2.RequestHandler):
 
             # update the mark
             last_mention.id = int(mentions[0].id)
-            self.response.out.write(str(mentions[0].id))
+            #self.response.out.write(str(mentions[0].id))
             last_mention.put()
 
     def process(self, status):
         # decide what to do
-        rep_type = self.parse_reply_type(s.text)
+        rep_type = self.parse_reply_type(status.text)
 
-        if rep_type == REP_TYPE_FB:
+        if rep_type == self.REP_TYPE_FB:
             # Quoted RT
-            api.update_status("RT @{name}: {text}".format(
+            self.api.update_status("RT @{name}: {text}".format(
                 name=status.user.screen_name,
                 text=status.text
                 ))
 
-        elif rep_type == REP_TYPE_MENU:
+        elif rep_type == self.REP_TYPE_MENU:
             # parse date
-            date, time = self.parse_datetime(s.text)
+            date, time = self.parse_datetime(status.text)
             menu = Menu.get_by_key_name(str(date))
 
-            if menu is not None:
-                api.update_status("@{name} {menu}".format(
-                    name=status.user.screen_name,
-                    menu=menu.format(date, time)
-                    ))
+            self.response.out.write([date, time])
+            if menu:
+                post = "@{name} {menu}".format(
+                        name=status.user.screen_name,
+                        menu=menu.format(date, time))
+                self.api.update_status(post,
+                        in_reply_to_status_id=status.id
+                        )
 
     def parse_reply_type(self, text):
         # decide what to do
         if re.search(u'朝|昼|夕|夜|明日|明後日|？|何|なに|\\?', text, re.U):
-            return REP_TYPE_MENU
+            return self.REP_TYPE_MENU
         elif re.search(u"好|味|良|美|微妙|当たり|あたり|アタリ|ハズレ|はずれ",text, re.U):
-            return REP_TYPE_FB
+            return self.REP_TYPE_FB
         else:
-            return REP_TYPE_NONE
+            return self.REP_TYPE_NONE
 
     def parse_datetime(self, text):
-        t = datetime.datetime.now().date()
+        # current datetime in JST
+        t = (datetime.datetime.now() + datetime.timedelta(hours=+9)).date()
 
         delta = 0
         # parse date
@@ -89,7 +93,7 @@ class MentionHandler(webapp2.RequestHandler):
             delta = 1
         elif re.search(u'明後日|あさって', text, re.U):
             delta = 2
-        elif re.search(u'明明後日|しあさって', text, re.u):
+        elif re.search(u'明々後日|明明後日|しあさって', text, re.U):
             delta = 3
         date = t - datetime.timedelta(days=delta)
 
@@ -118,11 +122,11 @@ class MentionHandler(webapp2.RequestHandler):
 
         # parse time
         if re.search(u'朝', text, re.U):
-            return date, MENU_TIME_BREAKFAST
+            return date, self.MENU_TIME_BREAKFAST
         elif re.search(u'昼|ランチ', text, re.U):
-            return date, MENU_TIME_LUNCH
+            return date, self.MENU_TIME_LUNCH
         else:
-            return date, MENU_TIME_DINNER
+            return date, self.MENU_TIME_DINNER
 
 
 
