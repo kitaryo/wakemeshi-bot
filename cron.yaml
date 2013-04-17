@@ -1,15 +1,21 @@
 cron:
 - description: daily breakfast report
   url: /notification/0
-  schedule: every day 21:30 # UTC; 06:30 in JST
+  schedule: every day 6:30
+  timezone: Asia/Tokyo
+
 
 - description: daily lunch report
   url: /notification/1
-  schedule: every day 02:30 # UTC; 11:30 in JST
+  schedule: every day 11:30
+  timezone: Asia/Tokyo
+
 
 - description: daily dinner report
   url: /notification/2
-  schedule: every day 08:00 # UTC; 17:00 in JST
+  schedule: every day 17:00
+  timezone: Asia/Tokyo
+
 
 - description: periodic processing of mentions
   url: /mention
@@ -17,5 +23,5 @@ cron:
 
 - description: periodic scraping of menu
   url: /menu
-  schedule: every day 19:17 # UTC; 04:17 in JST
-
+  schedule: every day 04:17
+  timezone: Asia/Tokyo
