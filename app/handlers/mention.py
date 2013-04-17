@@ -59,9 +59,8 @@ class MentionHandler(webapp2.RequestHandler):
             date, time = self.parse_datetime(status.text)
             menu = Menu.get_by_key_name(str(date))
 
-            self.response.out.write([date, time])
             if menu:
-                post = "@{name} {menu}".format(
+                post = u"@{name} {menu}".format(
                         name=status.user.screen_name,
                         menu=menu.format(date, time))
                 self.api.update_status(post,
