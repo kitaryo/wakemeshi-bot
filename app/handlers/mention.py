@@ -60,13 +60,17 @@ class MentionHandler(webapp2.RequestHandler):
 
         if rep_type == self.REP_TYPE_FB:
             # Quoted RT
-            try:
-                self.api.update_status(u"RT @{name}: {text}".format(
+            post = u"RT @{name}: {text}".format(
                     name=status.user.screen_name,
                     text=status.text
-                    ))
+                    )
+            try:
+                self.api.update_status(post)
             except tweepy.TweepError, e:
-                logging.info(u"Error while updating status; {error}".format(error=e.message))
+                logging.info(u"Error while updating status ('{text}'); {error}".format(
+                    error=e.message,
+                    text=post
+                    ))
 
         elif rep_type == self.REP_TYPE_MENU:
             # parse date
@@ -82,7 +86,10 @@ class MentionHandler(webapp2.RequestHandler):
                             in_reply_to_status_id=status.id
                             )
                 except tweepy.TweepError, e:
-                    logging.info(u"An tweet error has occurred; {error}".format(error=e.message))
+                    logging.info(u"An tweet error has occurred; text='{text}'; {error}".format(
+                        error=e.message,
+                        text=post
+                        ))
 
     def parse_reply_type(self, text):
         # decide what to do
