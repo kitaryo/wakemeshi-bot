@@ -1,18 +1,11 @@
 # -*- coding: UTF-8 -*-
-# oauth.rb
+# twitter.rb
 #
 # OAuth and some twitter action
 
 import tweepy
-import yaml
 
-def oauth(conffile):
-    # load config file
-    string = open(conffile).read()
-    string = string.decode('utf8')
-    config = yaml.load(string)
-    tokens = config['tokens']
-
+def oauth(tokens):
     auth = tweepy.OAuthHandler(
             tokens['consumer_key'],
             tokens['consumer_secret']

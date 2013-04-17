@@ -6,8 +6,11 @@
 import webapp2
 import re
 import datetime
+import logging
 
 import lib.twitter as twitter
+import lib.config as loader
+import lib.tweepy as tweepy
 
 
 # use model
@@ -25,18 +28,26 @@ class MentionHandler(webapp2.RequestHandler):
 
     def get(self):
         # instansiate and login to twitter
-        self.api = twitter.oauth("config/twitter.yaml")
+        config = loader.load("config/twitter.yaml")
+        try:
+            self.api = twitter.oauth(config['tokens'])
+        except tweepy.TweepError, e:
+            logging.info(u"Error while logging into twitter; {error}".format(error=e.message))
 
         # determin which mention is to be processed
         last_mention = Mention.get_or_insert("last_mention")
         since_id = last_mention.id
 
         # get actual mentions
-        mentions = self.api.mentions_timeline(since_id=since_id, count=30)
+        try:
+            mentions = self.api.mentions_timeline(since_id=since_id, count=30)
+        except tweepy.TweepError, e:
+            logging.info(u"Error while getting mentions; {error}".format(error=e.message))
         if len(mentions) > 0:
             for s in mentions:
                 # process against each mention
-                self.process(s)
+                if s.user.screen_name != config['account']:
+                    self.process(s)
 
             # update the mark
             last_mention.id = int(mentions[0].id)
@@ -49,10 +60,13 @@ class MentionHandler(webapp2.RequestHandler):
 
         if rep_type == self.REP_TYPE_FB:
             # Quoted RT
-            self.api.update_status(u"RT @{name}: {text}".format(
-                name=status.user.screen_name,
-                text=status.text
-                ))
+            try:
+                self.api.update_status(u"RT @{name}: {text}".format(
+                    name=status.user.screen_name,
+                    text=status.text
+                    ))
+            except tweepy.TweepError, e:
+                logging.info(u"Error while updating status; {error}".format(error=e.message))
 
         elif rep_type == self.REP_TYPE_MENU:
             # parse date
@@ -63,9 +77,12 @@ class MentionHandler(webapp2.RequestHandler):
                 post = u"@{name} {menu}".format(
                         name=status.user.screen_name,
                         menu=menu.format(date, time))
-                self.api.update_status(post,
-                        in_reply_to_status_id=status.id
-                        )
+                try:
+                    self.api.update_status(post,
+                            in_reply_to_status_id=status.id
+                            )
+                except tweepy.TweepError, e:
+                    logging.info(u"An tweet error has occurred; {error}".format(error=e.message))
 
     def parse_reply_type(self, text):
         # decide what to do

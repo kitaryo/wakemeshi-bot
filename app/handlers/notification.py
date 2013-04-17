@@ -6,8 +6,11 @@
 
 import webapp2
 
+import logging
 import datetime
 import lib.twitter as twitter
+import lib.config
+import lib.tweepy as tweepy
 
 # use models
 from app.models.menu import Menu
@@ -31,8 +34,12 @@ class NotificationHandler(webapp2.RequestHandler):
         self.response.out.write(post)
 
         # tweet
-        api = twitter.oauth('config/twitter.yaml')
-        api.update_status(post)
+        config = lib.config.load("config/twitter.yaml")
+        try:
+            api = twitter.oauth(config['tokens'])
+            api.update_status(post)
+        except tweepy.TweepError, e:
+            logging.info(u"Error while updating; {error}".format(error=e.message))
 
 
 
