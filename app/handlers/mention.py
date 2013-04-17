@@ -49,7 +49,7 @@ class MentionHandler(webapp2.RequestHandler):
 
         if rep_type == self.REP_TYPE_FB:
             # Quoted RT
-            self.api.update_status("RT @{name}: {text}".format(
+            self.api.update_status(u"RT @{name}: {text}".format(
                 name=status.user.screen_name,
                 text=status.text
                 ))

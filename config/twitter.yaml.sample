@@ -1,0 +1,5 @@
+tokens:
+  consumer_key: xxxxxxxxxxxx  # your bot's key comes here
+  consumer_secret: xxxxxxxxxxxx  # your bot's secret comes here
+  access_token: xxxxxxxxxx  # your account's token comes here
+  access_secret: xxxxxxxxxx  # your account's secret comes here
